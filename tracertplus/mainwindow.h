@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QVector>
+#include <QTimer>
 #include "pcap.h"
 #include "readonlydelegate.h"
 #include "datapackage.h"
@@ -40,7 +41,7 @@ private slots:
     void ShowIcmp(int payload); // show icmp layer
     void ShowTcp(int payload);  // show tcp layer
     void ShowUdp();             // show udp layer
-
+    void Timeout();             // every 1 second update time and info
     //use keyboard to control
     void on_tableWidget_currentCellChanged(int currentRow,int previousRow);
     // query ip position
@@ -65,9 +66,10 @@ private:
     char errbuf[PCAP_ERRBUF_SIZE];       // error buffer
     unsigned int count_number;           // number of package
     QVector<DataPackage> package_data;   // array of package data
-    SendIcmp *sender;                    // icmp sender thread
+    SendIcmp* sender;                    // icmp sender thread
     HttpRequest* http;                   // query the ip addr
     SubThread* thread;                   // icmp ping thread
+    QTimer* timer;                       // timer
     int row_number;                      // widget row number
     bool is_start;                       // flag of start
     bool is_hidden;                      // hide the other packge

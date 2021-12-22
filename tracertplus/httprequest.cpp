@@ -1,9 +1,8 @@
 #include "httprequest.h"
 #include <QTextCodec>
-#include <QDebug>
 
-HttpRequest::HttpRequest()
-{
+
+HttpRequest::HttpRequest(){
     this->sock = INVALID_SOCKET;
     this->request = QUERY_IP;
     this->position = "";

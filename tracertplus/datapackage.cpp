@@ -3,8 +3,7 @@
 #include <QVector>
 #include "winsock.h"
 
-DataPackage::DataPackage()
-{
+DataPackage::DataPackage(){
     qRegisterMetaType<DataPackage>("DataPackage");
     this->time_stamp = "";
     this->data_length = 0;
@@ -24,7 +23,7 @@ void DataPackage::SetPackageType(int type){
     this->type = type;
 }
 
-void DataPackage::SetPackagePointer(const u_char *pkt_content, int size){
+void DataPackage::SetPackagePointer(const u_char *pkt_content,  u_int size){
     this->pkt_content = (u_char*)malloc(size);
     memcpy((char*)(this->pkt_content), pkt_content,size);
 }

@@ -39,6 +39,14 @@
            <height>0</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
         </widget>
        </item>
        <item>
@@ -48,6 +56,14 @@
            <width>65</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>ip/name</string>
@@ -80,6 +96,14 @@
            <height>0</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>hop</string>
          </property>
@@ -110,6 +134,14 @@
            <width>75</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>time(ms)</string>
@@ -171,6 +203,14 @@
        </property>
        <item>
         <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>查询ip</string>
          </property>
@@ -196,6 +236,14 @@
        </item>
        <item>
         <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>地址</string>
          </property>
@@ -237,6 +285,14 @@
            <height>0</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>只显示ICMP报文</string>
          </property>
@@ -244,6 +300,14 @@
        </item>
        <item>
         <widget class="QLabel" name="label_6">
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>10</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
           <string>ICMP填充字符</string>
          </property>
@@ -386,6 +450,14 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuproject">
+    <property name="font">
+     <font>
+      <family>Consolas</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
     <property name="title">
      <string>project</string>
     </property>

@@ -2,9 +2,15 @@
 #define SUBTHREAD_H
 #include <QThread>
 #include <QString>
+#include <QAtomicInt>
 #include "pcap.h"
 #include "winsock2.h"
 #include "datapackage.h"
+/**
+  * SubThread class is used to analysis packge,
+  * when analysing is over,sub-thread will send result
+  * to main thread.
+*/
 
 class SubThread:public QThread
 {
@@ -16,7 +22,7 @@ private:
     time_t local_time_version_sec;
     struct tm local_time;
     char time_string[16];
-    volatile bool is_done;                // done flag
+    QAtomicInteger<bool> is_done;// done flag
     int ip_payload;
 
 protected:

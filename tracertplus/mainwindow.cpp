@@ -61,10 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
     // show network card!
     ShowNetworkCard();
 
-    // create 3 sub thread none parent!
+    // create 3 sub thread
     thread = new SubThread;
     sender = new SendIcmp;
     http = new HttpRequest;
+    // timer
+    timer = new QTimer(this);
     // add the signal-slot
     connect(ui->actionrun,&QAction::triggered,this,[=]{
         action_index = !action_index;
@@ -115,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent)
             thread->wait();
         }
     });
-
     // connect the signal and slot [empty the box]
     connect(ui->actionclear_box,&QAction::triggered,this,[=]{
         ui->textEdit->clear();
@@ -138,13 +139,15 @@ MainWindow::MainWindow(QWidget *parent)
             QMessageBox::warning(this,"Warning","please stop program first!");
         }
     });
-    // connect the signal and slot [package recv and show]
+    // [package recv and show]
     connect(thread,&SubThread::send,this,&MainWindow::HandleMessage);
-    // connect the signal and slot [icmp send]
+    // [icmp send]
     connect(sender,&SendIcmp::send,this,&MainWindow::HandleInfo);
-    // connect the signal and slot [http GET]
+    // [http GET]
     connect(http,&HttpRequest::query,this,&MainWindow::HandleAddr);
-
+    // [timer]
+    connect(timer,SIGNAL(timeout()),this,SLOT(Timeout()));
+    timer->start(1000);
 }
 
 /*
@@ -152,6 +155,9 @@ MainWindow::MainWindow(QWidget *parent)
 */
 MainWindow::~MainWindow()
 {
+    if(timer->isActive()){
+        timer->stop();
+    }
     if(thread->isRunning()){
         thread->SetFlag();
         thread->quit();
@@ -187,6 +193,7 @@ MainWindow::~MainWindow()
     delete thread;
     delete http;
     delete readonly_delegate;
+    delete timer;
 }
 
 /*
@@ -232,7 +239,8 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 /*
  * Capture
  * starting capture the package_data package from card
- * the package_data package in package_data link layer must meet the IEEE 802.3 protocol
+ * the package_data package in package_data link layer
+ * must meet the IEEE 802.3 protocol
  * or it will be throwed away
 */
 int MainWindow::Capture(){
@@ -688,3 +696,8 @@ void MainWindow::HidePackage(unsigned int number){
     }
 }
 
+void MainWindow::Timeout(){
+    int total_number = package_data.size();
+    ui->statusbar->showMessage("total:" + QString::number(total_number));
+
+}

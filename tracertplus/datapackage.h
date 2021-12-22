@@ -23,7 +23,7 @@ public:
     void SetTimeStamp(QString time_stamp);       // set timestamp
     void SetPackageType(int type);               // set package type
     void SetPackagePointer(
-            const u_char *pkt_content,int size); // set package pointer
+            const u_char *pkt_content,u_int size); // set package pointer
     void SetPackageInfo(QString info);           // set package information
 
     // get the var

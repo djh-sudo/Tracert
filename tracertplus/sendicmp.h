@@ -9,6 +9,7 @@
  * at djh113@126.com
 */
 #include <QThread>
+#include <QAtomicInt>
 #include "format.h"
 #include "winsock2.h"
 #include "ws2tcpip.h"
@@ -41,15 +42,15 @@ private:
     QString ip_name;  // ip addr or domain
     SOCKET raw_sock;  // raw sock
     ICMP_HEADER* icmp;// icmp header
-    sockaddr_in des_sock_addr;  // des addr
-    sockaddr_in recv_sock_addr; // recv addr
-    u_long des_ip;              // des ip addr
-    char padding_letter;        // icmp padding addr
-    bool reach_des;             // [flag] reach the des
-    volatile bool is_kill;      // [flag] thread been killed
-    int ttl;                    // icmp time to live
-    u_short sequence;           // sequence
-    u_long round_trip_time;     // time stamp
+    sockaddr_in des_sock_addr;    // des addr
+    sockaddr_in recv_sock_addr;   // recv addr
+    u_long des_ip;                // des ip addr
+    char padding_letter;          // icmp padding addr
+    bool reach_des;               // [flag] reach the des
+    QAtomicInteger<bool> is_kill; // [flag] thread been killed
+    int ttl;                      // icmp time to live
+    u_short sequence;             // sequence
+    u_long round_trip_time;       // time stamp
     // send and recv buffer
     char sender_buffer[sizeof(ICMP_HEADER) + ICMP_DATA_SIZE];
     char recv_buffer[ICMP_MAX_LENGTH];

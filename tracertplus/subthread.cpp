@@ -2,10 +2,11 @@
 #include <QDebug>
 
 /*
+ * encoding the type of package
  * tcp - > 20
  * udp -> 21
  * arp -> 22
- * icmp -> type
+ * icmp -> other
 */
 SubThread::SubThread()
 {

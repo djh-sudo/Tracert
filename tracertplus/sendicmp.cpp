@@ -1,9 +1,7 @@
 #include "sendicmp.h"
-#include <QDebug>
 
 
-SendIcmp::SendIcmp()
-{
+SendIcmp::SendIcmp(){
     this->timeout = ICMP_MAX_TIMEOUT;
     this->max_hop = ICMP_MAX_HOP;
     this->ip_name = TRACE_EXAMPLE;
@@ -16,12 +14,9 @@ SendIcmp::SendIcmp()
     this->reach_des = false;
     memset(sender_buffer,0,sizeof(ICMP_HEADER) + ICMP_DATA_SIZE);
     memset(recv_buffer,0,ICMP_MAX_LENGTH);
-
-
 }
 
 void SendIcmp::run(){
-
     // init the env
     if(!Init()) return;
     // assemble data
@@ -38,7 +33,6 @@ void SendIcmp::run(){
         if(!RecvData()) return;
         ttl++;
     }
-
     if(!is_kill)
         emit send("Trace is completed!\n");
     else
@@ -76,6 +70,19 @@ void SendIcmp::SetMaxhop(int max_hop){
 
 void SendIcmp::SetTimeout(int timeout){
     this->timeout = timeout;
+}
+
+void SendIcmp::SetKillSig(){
+    this->is_kill = true;
+}
+
+void SendIcmp::SetPadding(QString padding){
+    if(padding.length() > 1)
+        return;
+    else{
+        this->padding_letter = (padding.toStdString())[0];
+        return;
+    }
 }
 
 bool SendIcmp::Init(){
@@ -266,15 +273,3 @@ bool SendIcmp::CheckRecvData(char *recv_buffer, int size){
     return false;
 }
 
-void SendIcmp::SetKillSig(){
-    this->is_kill = true;
-}
-
-void SendIcmp::SetPadding(QString padding){
-    if(padding.length() > 1)
-        return;
-    else{
-        this->padding_letter = (padding.toStdString())[0];
-        return;
-    }
-}
