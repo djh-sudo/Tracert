@@ -13,6 +13,7 @@ SubThread::SubThread()
     this->header = nullptr;
     this->pointer = nullptr;
     this->pkt_data = nullptr;
+    this->ip_payload = 0;
 }
 
 bool SubThread::SetPointer(pcap_t *pointer){
@@ -58,7 +59,7 @@ void SubThread::run(){
         strftime(time_string,sizeof(time_string),"%H:%M:%S",&local_time);
         QString info = "";
         int type = EthernetHandle(pkt_data,info);
-        if(type){
+        if(type != -1){
             DataPackage data;
             u_int len = header->len;
             data.SetPackageType(type);
@@ -91,13 +92,13 @@ int SubThread::EthernetHandle(const u_char *pkt_content, QString &info){
         else if(sub_type == 17){
             return UdpHandle(pkt_content,info);
         }
-        else return 0;
+        else return -1;
     }
     else if(ethernet_type == 0x0806){
         return ArpHandle(pkt_content,info);
     }
     else
-        return 0;
+        return -1;
 }
 
 int SubThread::IpHandle(const u_char *pkt_content){
@@ -144,8 +145,11 @@ int SubThread::IcmpHandle(const u_char *pkt_content,QString&info){
     u_char code = icmp->code;
     QString result = "";
     switch (type) {
-    case 0:
-        if(!code) result = "Echo response (ping)"; break;
+    case 0:{
+        if(!code)
+            result = "Echo response (ping)";
+        break;
+    }
     case 3:{
         switch (code) {
         case 0:{
@@ -279,8 +283,8 @@ int SubThread::TcpHandle(const u_char *pkt_content, QString &info){
             case 22:{
                 info = "Handshake";
                 ssl += 4;
-                u_char type = (*ssl);
-                switch (type) {
+                u_char type_temp = (*ssl);
+                switch (type_temp) {
                 case 1: {
                     info += " Client Hello";
                     break;
@@ -321,7 +325,7 @@ int SubThread::TcpHandle(const u_char *pkt_content, QString &info){
                 break;
             }
             }
-            return type;
+            return 20;
         }else type = 7;
     }
 

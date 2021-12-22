@@ -446,7 +446,7 @@
   <action name="actionclear_package">
    <property name="icon">
     <iconset resource="src.qrc">
-     <normaloff>:/empty.png</normaloff>:/empty.png</iconset>
+     <normaloff>:/empty1.png</normaloff>:/empty1.png</iconset>
    </property>
    <property name="text">
     <string>clear package</string>

@@ -8,6 +8,16 @@ SendIcmp::SendIcmp()
     this->max_hop = ICMP_MAX_HOP;
     this->ip_name = TRACE_EXAMPLE;
     this->padding_letter = PADDING_LETTER;
+    this->raw_sock = INVALID_SOCKET;
+    this->ttl = 1;
+    this->sequence = 0;
+    this->round_trip_time = 0;
+    this->is_kill = false;
+    this->reach_des = false;
+    memset(sender_buffer,0,sizeof(ICMP_HEADER) + ICMP_DATA_SIZE);
+    memset(recv_buffer,0,ICMP_MAX_LENGTH);
+
+
 }
 
 void SendIcmp::run(){

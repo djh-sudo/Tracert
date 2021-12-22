@@ -8,7 +8,7 @@
 #include "datapackage.h"
 #include "sendicmp.h"
 #include "httprequest.h"
-
+#include "subthread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,33 +25,36 @@ public:
     void ShowNetworkCard();
     int Capture();
     QColor SetColor(int type);
+    void HidePackage(unsigned int number);
 
 private slots:
     void on_comboBox_currentIndexChanged(int index);
     void HandleMessage(DataPackage data);
     void HandleInfo(QString info);
     void HandleAddr(QString addr);
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
+
+
+    void ShowEthenet();         // show ethernet layer
+    void ShowArp();             // show arp layer
+    int ShowIp();               // show ip layer
+    void ShowIcmp(int payload); // show icmp layer
+    void ShowTcp(int payload);  // show tcp layer
+    void ShowUdp();             // show udp layer
+
+    //use keyboard to control
+    void on_tableWidget_currentCellChanged(int currentRow,int previousRow);
+    // query ip position
+    void on_lineEdit_4_returnPressed();
+    // show icmp package only
+    void on_checkBox_stateChanged();
     // query the ip addr [API]
     void on_pushButton_3_clicked();
     // show the detail info about data package
     void on_tableWidget_cellClicked(int row);
-    // show ethernet layer
-    void ShowEthenet();
-    // show ip/arp layer
-    void ShowArp();
-    int ShowIp();
-    // show icmp layer
-    void ShowIcmp(int payload);
-    // show tcp layer
-    void ShowTcp(int payload);
-    // show udp layer
-    void ShowUdp();
-
-    void on_tableWidget_currentCellChanged(int currentRow,int previousRow);
-
-    void on_lineEdit_4_returnPressed();
+    // start tracert
+    void on_pushButton_clicked();
+    // stop tracert
+    void on_pushButton_2_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -60,10 +63,13 @@ private:
     pcap_t* pointer;                     // data package pointer
     ReadOnlyDelegate* readonly_delegate; // readonly delegate
     char errbuf[PCAP_ERRBUF_SIZE];       // error buffer
-    unsigned char count_number;          // number of package
+    unsigned int count_number;           // number of package
     QVector<DataPackage> package_data;   // array of package data
     SendIcmp *sender;                    // icmp sender thread
     HttpRequest* http;                   // query the ip addr
+    SubThread* thread;                   // icmp ping thread
     int row_number;                      // widget row number
+    bool is_start;                       // flag of start
+    bool is_hidden;                      // hide the other packge
 };
 #endif // MAINWINDOW_H

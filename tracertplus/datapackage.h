@@ -12,7 +12,7 @@ private:
     int type;            // package type
 
 protected:
-    static QString ByteToHex(u_char*str,int size);
+    static QString ByteToHex(const u_char*str,int size);
 
 public:
     // root pointer of package data

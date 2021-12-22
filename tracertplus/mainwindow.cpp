@@ -5,9 +5,9 @@
 #include <QString>
 #include <QColor>
 #include <QTextCodec>
-#include <QRegExp>
+#include <QDateTime>
 #include <QDebug>
-#include "subthread.h"
+#include <QMessageBox>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -47,20 +47,22 @@ MainWindow::MainWindow(QWidget *parent)
     // add toolbar
     ui->toolBar->addAction(ui->actionrun);
     ui->toolBar->addAction(ui->actionclear_box);
+    ui->toolBar->addAction(ui->actionclear_package);
 
     // other initical
     this->device = nullptr;
     this->all_devices = nullptr;
     this->pointer = nullptr;
     this->row_number = -1;
+    this->is_hidden = false;
     this->package_data.clear();
 
     static bool action_index = false;
     // show network card!
     ShowNetworkCard();
 
-    // create a sub thread
-    SubThread* thread = new SubThread;
+    // create 3 sub thread none parent!
+    thread = new SubThread;
     sender = new SendIcmp;
     http = new HttpRequest;
     // add the signal-slot
@@ -88,23 +90,26 @@ MainWindow::MainWindow(QWidget *parent)
                 if(set_ok){
                     ui->actionrun->setIcon(QIcon(":/stop.png"));
                     ui->comboBox->setEnabled(false);
+                    is_start = true;
                     thread->ResetFlag();
                     thread->start();
                 }else{
                     // fail to start!
                     action_index = ! action_index;
                     count_number = 0;
+                    is_start = false;
                 }
             }else{
                 // fail to start!
                 action_index = ! action_index;
                 count_number = 0;
-
+                is_start = false;
             }
         }else{
             // stop the thread!
             ui->actionrun->setIcon(QIcon(":/start.png"));
             ui->comboBox->setEnabled(true);
+            is_start = false;
             thread->SetFlag();
             thread->quit();
             thread->wait();
@@ -114,6 +119,24 @@ MainWindow::MainWindow(QWidget *parent)
     // connect the signal and slot [empty the box]
     connect(ui->actionclear_box,&QAction::triggered,this,[=]{
         ui->textEdit->clear();
+    });
+    // [empty packge widget box]
+    connect(ui->actionclear_package,&QAction::triggered,this,[=]{
+        if(!is_start){
+            unsigned int number = package_data.size();
+            for(unsigned int i = 0; i < number; i++){
+                free((char*)(package_data[i].pkt_content));
+                package_data[i].pkt_content = nullptr;
+            }
+            QVector<DataPackage>().swap(package_data);
+            package_data.clear();
+
+            ui->tableWidget->clearContents();
+            ui->tableWidget->setRowCount(0);
+        }
+        else{
+            QMessageBox::warning(this,"Warning","please stop program first!");
+        }
     });
     // connect the signal and slot [package recv and show]
     connect(thread,&SubThread::send,this,&MainWindow::HandleMessage);
@@ -129,8 +152,20 @@ MainWindow::MainWindow(QWidget *parent)
 */
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete sender;
+    if(thread->isRunning()){
+        thread->SetFlag();
+        thread->quit();
+        thread->wait();
+    }
+    if(sender->isRunning()){
+        sender->SetKillSig();
+        sender->quit();
+        sender->wait();
+    }
+    if(http->isRunning()){
+        http->quit();
+        http->wait();
+    }
     if(pointer){
         pcap_close(pointer);
         pointer = nullptr;
@@ -140,6 +175,18 @@ MainWindow::~MainWindow()
         all_devices = nullptr;
         device = nullptr;
     }
+    int number = package_data.size();
+    for(int i = 0; i < number; i++){
+        free((char*)(package_data[i].pkt_content));
+        package_data[i].pkt_content = nullptr;
+    }
+    package_data.clear();
+    package_data.shrink_to_fit();
+    delete ui;
+    delete sender;
+    delete thread;
+    delete http;
+    delete readonly_delegate;
 }
 
 /*
@@ -175,8 +222,8 @@ void MainWindow::ShowNetworkCard(){
 */
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
-    int i = 0;
     if(index != 0){
+        int i = 0;
         for(device = all_devices; i < index - 1; i++,device = device->next);
     }
     return;
@@ -223,7 +270,7 @@ int MainWindow::Capture(){
 */
 void MainWindow::HandleMessage(DataPackage data){
     ui->tableWidget->insertRow(count_number);
-    this->package_data.push_back(data);
+    package_data.push_back(data);
     int type = data.GetPackageType();
     QColor color = SetColor(type);
     ui->tableWidget->setItem(count_number,0,new QTableWidgetItem(QString::number(count_number + 1)));
@@ -236,6 +283,14 @@ void MainWindow::HandleMessage(DataPackage data){
     for(int i = 0;i < 7;i++){
         ui->tableWidget->item(count_number,i)->setBackground(color);
     }
+
+    if(ui->checkBox->isChecked() && type >= 20){
+        ui->tableWidget->setRowHidden(count_number,true);
+        if(!is_hidden){
+            is_hidden = true;
+            HidePackage(count_number);
+        }
+    }
     count_number++;
 }
 
@@ -246,7 +301,6 @@ void MainWindow::HandleMessage(DataPackage data){
 void MainWindow::on_pushButton_clicked()
 {
     if(!sender->isRunning()){
-        ui->textEdit->clear();
         QString ip_name = ui->lineEdit->text();
         QString max_hop = ui->lineEdit_2->text();
         QString timeout = ui->lineEdit_3->text();
@@ -257,6 +311,10 @@ void MainWindow::on_pushButton_clicked()
         sender->SetTimeout(timeout.toUtf8().toInt());
         sender->SetPadding(padding);
         // start the sub thread
+        ui->textEdit->append("------------------------------");
+        QString str = QDateTime(QDateTime::currentDateTime())
+                .toString("yyyy-MM-dd hh:mm:ss ddd");
+        ui->textEdit->append(str);
         sender->start();
     }else{
         // restart the thread
@@ -311,7 +369,7 @@ void MainWindow::on_pushButton_2_clicked()
 */
 void MainWindow::on_pushButton_3_clicked()
 {
-    QString ip_addr =  ui->lineEdit_4->text();
+    QString ip_addr =  ui->lineEdit_4->text().replace(" ","");
     http->SetIpAddr(ip_addr);
     if(!http->isRunning())
         http->start();
@@ -475,7 +533,7 @@ void MainWindow::ShowIcmp(int payload){
     if(payload > 0){
         QTreeWidgetItem* dataItem = new QTreeWidgetItem(QStringList()<<"Data (" + QString::number(payload) + ") bytes");
         item->addChild(dataItem);
-        if(code_type != 11){
+        if(code_type == 8 || code_type == 0){
             QString icmpData = package_data[row_number].GetIcmpData(payload);
             dataItem->addChild(new QTreeWidgetItem(QStringList()<<icmpData));
         }
@@ -546,15 +604,15 @@ void MainWindow::ShowTcp(int payload){
     item->addChild(flagTree);
     QString temp = URG == "1"?"Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .." + URG + ". .... = Urgent(URG):" + temp));
-    temp = ACK == "1"?"Set":"Not set";
+    temp = ACK == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... ..." + ACK + " .... = Acknowledgment(ACK):" + temp));
-    temp = PSH == "1"?"Set":"Not set";
+    temp = PSH == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... " + PSH + "... = Push(PSH):" + temp));
-    temp = RST == "1"?"Set":"Not set";
+    temp = RST == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... ." + RST + ".. = Reset(RST):" + temp));
-    temp = SYN == "1"?"Set":"Not set";
+    temp = SYN == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... .." + SYN + ". = Syn(SYN):" + temp));
-    temp = FIN == "1"?"Set":"Not set";
+    temp = FIN == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... ..." + FIN + " = Fin(FIN):" + temp));
 
     QString window = package_data[row_number].GetTcpWinSize();
@@ -571,20 +629,20 @@ void MainWindow::ShowUdp(){
     QString desPort = package_data[row_number].GetUdpDesPort();
     QString Length = package_data[row_number].GetUdpDataLen();
     QString checksum = "0x" + package_data[row_number].GetUdpCheckSum();
-    QTreeWidgetItem*item5 = new QTreeWidgetItem(QStringList()<<"User Datagram Protocol, Src Port:" + srcPort + ", Dst Port:" + desPort);
-    ui->treeWidget->addTopLevelItem(item5);
-    item5->addChild(new QTreeWidgetItem(QStringList()<<"Source Port:" + srcPort));
-    item5->addChild(new QTreeWidgetItem(QStringList()<<"Destination Port:" + desPort));
-    item5->addChild(new QTreeWidgetItem(QStringList()<<"length:" + Length));
-    item5->addChild(new QTreeWidgetItem(QStringList()<<"Checksum:" + checksum));
+    QTreeWidgetItem*item = new QTreeWidgetItem(QStringList()<<"User Datagram Protocol, Src Port:" + srcPort + ", Dst Port:" + desPort);
+    ui->treeWidget->addTopLevelItem(item);
+    item->addChild(new QTreeWidgetItem(QStringList()<<"Source Port:" + srcPort));
+    item->addChild(new QTreeWidgetItem(QStringList()<<"Destination Port:" + desPort));
+    item->addChild(new QTreeWidgetItem(QStringList()<<"length:" + Length));
+    item->addChild(new QTreeWidgetItem(QStringList()<<"Checksum:" + checksum));
     int udpLength = Length.toUtf8().toInt();
     if(udpLength > 0){
-        item5->addChild(new QTreeWidgetItem(QStringList()<<"UDP PayLoad (" + QString::number(udpLength - 8) + " bytes)"));
+        item->addChild(new QTreeWidgetItem(QStringList()<<"UDP PayLoad (" + QString::number(udpLength - 8) + " bytes)"));
     }
 }
 
-void MainWindow::on_tableWidget_currentCellChanged(int currentRow,int previousRow)
-{
+void MainWindow::on_tableWidget_currentCellChanged(
+        int currentRow,int previousRow){
     if(currentRow != previousRow && currentRow >= 0)
         on_tableWidget_cellClicked(currentRow);
     else
@@ -596,8 +654,37 @@ void MainWindow::on_lineEdit_4_returnPressed()
     on_pushButton_3_clicked();
 }
 
-void MainWindow::on_lineEdit_4_textChanged()
+void MainWindow::on_checkBox_stateChanged()
 {
-    QRegExp reg_exp("((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])");
-    ui->lineEdit_4->setValidator(new QRegExpValidator(reg_exp,this));
+    if(ui->checkBox->isChecked()){
+        // check only show icmp
+        int number = package_data.size();
+        for(int i = 0;i < number; i++){
+            if(package_data[i].GetPackageType() >= 20){
+                ui->tableWidget->setRowHidden(i,true);
+            }
+            else
+                continue;
+        }
+    }
+    else{
+        // uncheck show all
+        is_hidden = false;
+        int number = package_data.size();
+        for(int i = 0; i < number; i++){
+            ui->tableWidget->setRowHidden(i,false);
+        }
+    }
 }
+
+void MainWindow::HidePackage(unsigned int number){
+    for(unsigned int i = 0;i < number; i++){
+        int type = package_data[i].GetPackageType();
+        if(type >=20){
+            ui->tableWidget->setRowHidden(i,true);
+        }
+        else
+            continue;
+    }
+}
+

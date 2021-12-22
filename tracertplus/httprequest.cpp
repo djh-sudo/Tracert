@@ -9,6 +9,7 @@ HttpRequest::HttpRequest()
     this->position = "";
     this->ip_addr = nullptr;
     this->buffer_size = 1024;
+    memset(result,0,30);
 }
 
 bool HttpRequest::GetIp(QString name){
@@ -77,11 +78,14 @@ bool HttpRequest::GetPosition(){
     if(!SetSocketInfo() && sock) return false;
     if(::send(sock,package,strlen(package),0) <= 0) return false;
     if(::recv(sock,recv_buffer,sizeof(recv_buffer),0) <= 0)return false;
+    // avoid Chinese garbled,decode as GBK
     QTextCodec *codec = QTextCodec::codecForName("GBK");
     position = codec->toUnicode(recv_buffer);
+
+    closesocket(sock);
+    WSACleanup();
     return true;
 }
-
 
 QString HttpRequest::GetResult(){
     return result;

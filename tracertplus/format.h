@@ -1,9 +1,9 @@
 #ifndef FORMAT_H
 #define FORMAT_H
 
-/*
+/**
    @ This head file is used to define format of packages
-   @ auther DJH-sudo(https://github.com/djh-sudo/)
+   @ author DJH-sudo(https://github.com/djh-sudo/)
    @ if you have any question,pls contact me at djh113@126.com
 */
 

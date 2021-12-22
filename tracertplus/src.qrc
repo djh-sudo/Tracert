@@ -4,5 +4,6 @@
         <file>shark.png</file>
         <file>start.png</file>
         <file>stop.png</file>
+        <file>empty1.png</file>
     </qresource>
 </RCC>

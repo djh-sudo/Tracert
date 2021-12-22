@@ -33,7 +33,7 @@ void DataPackage::SetPackageInfo(QString info){
     this->info = info;
 }
 
-QString DataPackage::ByteToHex(u_char *str, int size){
+QString DataPackage::ByteToHex(const u_char *str, int size){
     QString res = "";
     for(int i = 0;i < size;i++){
         char one = str[i] >> 4;
@@ -64,10 +64,10 @@ QString DataPackage::GetInfo(){
 
 QString DataPackage::GetType(){
     switch (type) {
-      case 20:return "TCP";
-      case 21:return "UDP";
-      case 22:return "ARP";
-      default:return "ICMP";
+    case 20:return "TCP";
+    case 21:return "UDP";
+    case 22:return "ARP";
+    default:return "ICMP";
     }
 }
 
@@ -89,9 +89,8 @@ QString DataPackage::GetDestination(){
 QString DataPackage::GetDesMacAddr(){
     ETHER_HEADER*ethernet;
     ethernet = (ETHER_HEADER*)pkt_content;
-    u_char*addr;
     if(ethernet){
-        addr = ethernet->ether_des_host;
+        u_char*addr = ethernet->ether_des_host;
         if(addr){
             QString res = ByteToHex(addr,1) + ":"
                     + ByteToHex((addr+1),1) + ":"
@@ -111,9 +110,8 @@ QString DataPackage::GetDesMacAddr(){
 QString DataPackage::GetSrcMacAddr(){
     ETHER_HEADER*ethernet;
     ethernet = (ETHER_HEADER*)pkt_content;
-    u_char*addr;
     if(ethernet){
-        addr = ethernet->ether_src_host;
+        u_char*addr = ethernet->ether_src_host;
         if(addr){
             QString res = ByteToHex(addr,1) + ":"
                     + ByteToHex((addr+1),1) + ":"
@@ -350,9 +348,8 @@ QString DataPackage::GetArpOpCode(){
 QString DataPackage::GetArpSrcEtherAddr(){
     ARP_HEADER*arp;
     arp = (ARP_HEADER*)(pkt_content + 14);
-    u_char*addr;
     if(arp){
-        addr = arp->src_eth_addr;
+        u_char* addr = arp->src_eth_addr;
         if(addr){
             QString res = ByteToHex(addr,1) + ":"
                     + ByteToHex((addr+1),1) + ":"
@@ -383,9 +380,8 @@ QString DataPackage::GetArpSrcIpAddr(){
 QString DataPackage::GetArpDesEtherAddr(){
     ARP_HEADER*arp;
     arp = (ARP_HEADER*)(pkt_content + 14);
-    u_char*addr;
     if(arp){
-        addr = arp->des_eth_addr;
+        u_char*addr = arp->des_eth_addr;
         if(addr){
             QString res = ByteToHex(addr,1) + ":"
                     + ByteToHex((addr+1),1) + ":"
@@ -520,16 +516,16 @@ QString DataPackage::GetTcpUrgentP(){
 
 QString DataPackage::GetTcpOpKind(int kind){
     switch(kind){
-      case 0:return "EOL";              // end of list
-      case 1:return "NOP";              // no operation
-      case 2:return "MSS";              // max segment
-      case 3:return "WSOPT";            // window scaling factor
-      case 4:return "SACK-Premitted";   // support SACK
-      case 5:return "SACK";             // SACK Block
-      case 8:return "TSPOT";            // Timestamps
-      case 19:return "TCP-MD5";         // MD5
-      case 28:return "UTP";             // User Timeout
-      case 29:return "TCP-AO";          // authenticated
+    case 0:return "EOL";              // end of list
+    case 1:return "NOP";              // no operation
+    case 2:return "MSS";              // max segment
+    case 3:return "WSOPT";            // window scaling factor
+    case 4:return "SACK-Premitted";   // support SACK
+    case 5:return "SACK";             // SACK Block
+    case 8:return "TSPOT";            // Timestamps
+    case 19:return "TCP-MD5";         // MD5
+    case 28:return "UTP";             // User Timeout
+    case 29:return "TCP-AO";          // authenticated
     }
 }
 
