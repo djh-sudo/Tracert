@@ -506,7 +506,7 @@ int MainWindow::ShowIp(){
         FLAG = "";
     QTreeWidgetItem*bitTree = new QTreeWidgetItem(QStringList()<<"Flags:" + flags + FLAG);
     item->addChild(bitTree);
-    QString temp = reservedBit == "1"?"Set":"Not set";
+    QString temp = reservedBit == "1" ? "Set":"Not set";
     bitTree->addChild(new QTreeWidgetItem(QStringList() << reservedBit + "... .... = Reserved bit:" + temp));
     temp = DF == "1" ? "Set":"Not set";
     bitTree->addChild(new QTreeWidgetItem(QStringList()<<"." + DF + ".. .... = Don't fragment:" + temp));
@@ -532,11 +532,11 @@ void MainWindow::ShowIcmp(int payload){
     QString checksum = "0x" + package_data[row_number].GetIcmpCheckSum();
     QString id = package_data[row_number].GetIcmpIdentification();
     QString seq = package_data[row_number].GetIcmpSequeue();
-    item->addChild(new QTreeWidgetItem(QStringList()<<"type:" + type + "(" + info + ")"));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"code:" + code));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Checksum:" + checksum));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Identifier:" + id));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Sequence Number:" + seq));
+    item->addChild(new QTreeWidgetItem(QStringList() << "type:" + type + "(" + info + ")"));
+    item->addChild(new QTreeWidgetItem(QStringList() << "code:" + code));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Checksum:" + checksum));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Identifier:" + id));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Sequence Number:" + seq));
     int code_type = package_data[row_number].GetPackageType();
     if(payload > 0){
         QTreeWidgetItem* dataItem = new QTreeWidgetItem(QStringList()<<"Data (" + QString::number(payload) + ") bytes");
@@ -610,17 +610,17 @@ void MainWindow::ShowTcp(int payload){
     }
     QTreeWidgetItem* flagTree = new QTreeWidgetItem(QStringList()<<"Flags:" + flag + " (" + FLAG + ")");
     item->addChild(flagTree);
-    QString temp = URG == "1"?"Set":"Not set";
+    QString temp = URG == "1" ? "Set":"Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .." + URG + ". .... = Urgent(URG):" + temp));
-    temp = ACK == "1" ? "Set":"Not set";
+    temp = ACK == "1" ? "Set" : "Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... ..." + ACK + " .... = Acknowledgment(ACK):" + temp));
-    temp = PSH == "1" ? "Set":"Not set";
+    temp = PSH == "1" ? "Set" : "Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... " + PSH + "... = Push(PSH):" + temp));
-    temp = RST == "1" ? "Set":"Not set";
+    temp = RST == "1" ? "Set" : "Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... ." + RST + ".. = Reset(RST):" + temp));
-    temp = SYN == "1" ? "Set":"Not set";
+    temp = SYN == "1" ? "Set" : "Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... .." + SYN + ". = Syn(SYN):" + temp));
-    temp = FIN == "1" ? "Set":"Not set";
+    temp = FIN == "1" ? "Set" : "Not set";
     flagTree->addChild(new QTreeWidgetItem(QStringList()<<".... .... ..." + FIN + " = Fin(FIN):" + temp));
 
     QString window = package_data[row_number].GetTcpWinSize();
@@ -639,10 +639,10 @@ void MainWindow::ShowUdp(){
     QString checksum = "0x" + package_data[row_number].GetUdpCheckSum();
     QTreeWidgetItem*item = new QTreeWidgetItem(QStringList()<<"User Datagram Protocol, Src Port:" + srcPort + ", Dst Port:" + desPort);
     ui->treeWidget->addTopLevelItem(item);
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Source Port:" + srcPort));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Destination Port:" + desPort));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"length:" + Length));
-    item->addChild(new QTreeWidgetItem(QStringList()<<"Checksum:" + checksum));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Source Port:" + srcPort));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Destination Port:" + desPort));
+    item->addChild(new QTreeWidgetItem(QStringList() << "length:" + Length));
+    item->addChild(new QTreeWidgetItem(QStringList() << "Checksum:" + checksum));
     int udpLength = Length.toUtf8().toInt();
     if(udpLength > 0){
         item->addChild(new QTreeWidgetItem(QStringList()<<"UDP PayLoad (" + QString::number(udpLength - 8) + " bytes)"));

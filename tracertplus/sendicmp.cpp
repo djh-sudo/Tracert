@@ -178,7 +178,7 @@ bool SendIcmp::SendData(u_short seq_no){
     ((ICMP_HEADER*)sender_buffer)->checksum = 0;
     ((ICMP_HEADER*)sender_buffer)->checksum = GenerateCheckSum((u_short*)sender_buffer,sizeof(ICMP_HEADER) + ICMP_DATA_SIZE);
     // record seq and time
-    sequence = htons(((ICMP_HEADER*)sender_buffer)->sequence);
+    sequence = htons(seq_no);
     round_trip_time =  GetTickCount();
     // send
     if(sendto(raw_sock,
@@ -242,14 +242,14 @@ bool SendIcmp::CheckRecvData(char *recv_buffer, int size){
     u_short id,seq;
     if(icmp->type == ICMP_REPLY){
         id = ntohs(icmp->identification);
-        seq = ntohs(icmp->sequence);
+        seq = icmp->sequence;
     }
     else if(icmp->type == ICMP_TTLE){
         char* ip = recv_buffer + ip_len + sizeof(ICMP_HEADER);
         int len = (((IP_HEADER*)ip)->versiosn_head_length & 0x0F) * 4;
         ICMP_HEADER*temp_icmp = (ICMP_HEADER*)(ip + len);
         id = ntohs(temp_icmp->identification);
-        seq = ntohs(temp_icmp->sequence);
+        seq = temp_icmp->sequence;
     }
     else
         return false;
