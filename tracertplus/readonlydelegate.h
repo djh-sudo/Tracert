@@ -12,7 +12,7 @@ public:
     {}
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-const QModelIndex &index) const override //final
+                          const QModelIndex &index) const override //final
     {
         Q_UNUSED(parent)
         Q_UNUSED(option)

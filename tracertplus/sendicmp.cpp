@@ -155,10 +155,6 @@ bool SendIcmp::AssembleData(){
         WSACleanup();
         return false;
     }
-    // create icmp pakcage buffer
-    memset(sender_buffer,0,sizeof(sender_buffer));
-    memset(recv_buffer,0,sizeof(recv_buffer));
-
     // filling the icmp
     icmp = (ICMP_HEADER*)sender_buffer;
     icmp->type = ICMP_REQUEST;
@@ -172,7 +168,13 @@ bool SendIcmp::AssembleData(){
 
 bool SendIcmp::SendData(u_short seq_no){
     // setting the ttl
-    setsockopt(raw_sock,IPPROTO_IP,IP_TTL,(char*)& ttl,sizeof(ttl));
+    if(setsockopt(raw_sock,IPPROTO_IP,IP_TTL,(char*)& ttl,sizeof(ttl)) == SOCKET_ERROR){
+        emit send("Fail to set ttl!\n"
+                  "error code: " + QString::number(WSAGetLastError()));
+        closesocket(raw_sock);
+        WSACleanup();
+        return false;
+    }
     // padding the icmp
     ((ICMP_HEADER*)sender_buffer)->sequence = htons(seq_no);
     ((ICMP_HEADER*)sender_buffer)->checksum = 0;
